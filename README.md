@@ -1,6 +1,5 @@
 Type-Key oriented Dictionary (Dictionary<Type, TClass>)
 
-URL: ```git clone https://github.com/OkulusDev/Oxygen.git```
 
 ## **Example:**
 
@@ -20,3 +19,13 @@ public class PlayerStats : MonoBehaviour
 }
 
 ## **In Inspector:**
+
+
+
+
+( ͡° ͜ʖ ͡°)
+
+Made by BagStrider:
+Discord: @BagStrider
+
+
