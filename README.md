@@ -3,20 +3,20 @@ Type-Key oriented Dictionary (Dictionary<Type, TClass>)
 
 ## **Example:**
 
-public class PlayerStats : MonoBehaviour
-{
-    [SerializeField] private SerializedTypeDictionary<Stat> _stats = new ();
-
-    public Stat GetStat<T>() where T : Stat
+    public class PlayerStats : MonoBehaviour
     {
-        if (!_stats.TryGet(out Stat stat))
+        [SerializeField] private SerializedTypeDictionary<Stat> _stats = new ();
+    
+        public Stat GetStat<T>() where T : Stat
         {
-            throw new KeyNotFoundException("No stat found with name " + typeof(T).Name);
+            if (!_stats.TryGet(out Stat stat))
+            {
+                throw new KeyNotFoundException("No stat found with name " + typeof(T).Name);
+            }
+                
+            return stat;
         }
-            
-        return stat;
     }
-}
 
 ## **In Inspector:**
 
@@ -27,5 +27,6 @@ public class PlayerStats : MonoBehaviour
 
 Made by BagStrider:
 Discord: @BagStrider
+
 
 
