@@ -1,6 +1,8 @@
-Type-Key oriented Dictionary
+Type-Key oriented Dictionary (Dictionary<Type, TClass>)
 
-Example:
+URL: ```git clone https://github.com/OkulusDev/Oxygen.git```
+
+## **Example:**
 
 public class PlayerStats : MonoBehaviour
 {
@@ -17,9 +19,4 @@ public class PlayerStats : MonoBehaviour
     }
 }
 
-
-
-( ͡° ͜ʖ ͡°)
-
-Made by BagStrider:
-Discord: @BagStrider
+## **In Inspector:**
