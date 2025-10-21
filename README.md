@@ -1,5 +1,7 @@
 Type-Key oriented Dictionary (Dictionary<Type, TClass>)
 
+The Type of class is cached in key
+
 
 ## **Example:**
 
@@ -44,6 +46,7 @@ Type-Key oriented Dictionary (Dictionary<Type, TClass>)
 ## **Contacts:**
 
 Discord: @BagStrider
+
 
 
 
