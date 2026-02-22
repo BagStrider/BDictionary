@@ -1,7 +1,12 @@
 Type-Key oriented Dictionary (Dictionary<Type, TClass>)
 
+[Download Package](https://github.com/BagStrider/BDictionary/releases/tag/Install)
+
 The Type of class is cached in key
 
+## **In Inspector:**
+
+<img width="523" height="376" alt="image_2025-10-21_07-32-48" src="https://github.com/user-attachments/assets/219a7466-d25e-4057-87df-2d78498df939" />
 
 ## **Example:**
 
@@ -36,16 +41,10 @@ The Type of class is cached in key
     [Serializable] public class Speed : Stat<float> { }
     [Serializable] public class AttackSpeed : Stat<float> { }
 
-## **In Inspector:**
-
-<img width="523" height="376" alt="image_2025-10-21_07-32-48" src="https://github.com/user-attachments/assets/219a7466-d25e-4057-87df-2d78498df939" />
-
-
-( ͡° ͜ʖ ͡°)
-
 ## **Contacts:**
 
-Discord: @BagStrider
+Discord: @BagStrider ( ͡° ͜ʖ ͡°)
+
 
 
 
