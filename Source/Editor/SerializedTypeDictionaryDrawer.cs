@@ -1,20 +1,19 @@
-#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Stats;
 using UnityEditor;
 using UnityEngine;
 
-namespace BagSerializer.Editor
+namespace Plugins.BDictionary.Source.Editor
 {
     [CustomPropertyDrawer(typeof(SerializedTypeDictionary<>), true)]
     public class SerializedTypeDictionaryDrawer : PropertyDrawer
     {
         private bool _foldout;
         private static List<Type> _allValueTypes;
-        
+        private Type _cachedBaseType;
+
         [InitializeOnLoadMethod]
         private static void Init()
         {
@@ -24,22 +23,25 @@ namespace BagSerializer.Editor
                 _allValueTypes = null;
             };
         }
-        
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            if (_cachedBaseType == null)
+                _cachedBaseType = GetGenericArgumentType(property);
+
             _foldout = EditorGUI.Foldout(position, _foldout, label, true);
             if (!_foldout) return;
 
             EditorGUI.indentLevel++;
 
             SerializedProperty valuesProp = property.FindPropertyRelative("_values");
-            
+
             if (valuesProp == null || valuesProp.arraySize == 0)
             {
                 DrawButton(valuesProp);
                 return;
             }
-            
+
             DrawExistingElements(valuesProp);
             DrawButton(valuesProp);
         }
@@ -48,7 +50,7 @@ namespace BagSerializer.Editor
         {
             if (GUILayout.Button("Add"))
                 ShowDropdown(valuesProp);
-            
+
             if (EditorGUI.indentLevel > 0)
                 EditorGUI.indentLevel--;
         }
@@ -57,42 +59,46 @@ namespace BagSerializer.Editor
             for (int i = 0; i < valuesProp.arraySize; i++)
             {
                 var element = valuesProp.GetArrayElementAtIndex(i);
-                
+
                 if (element == null ||
                     element.propertyType != SerializedPropertyType.ManagedReference ||
-                    element.managedReferenceValue == null
-                    )
+                    element.managedReferenceValue == null)
                 {
                     continue;
                 }
-                
+
                 EditorGUILayout.BeginHorizontal("box");
                 EditorGUILayout.PropertyField(
                     element,
                     new GUIContent(element.managedReferenceValue.GetType().Name),
                     true
                 );
+
                 if (GUILayout.Button("✖", GUILayout.Width(20)))
                 {
                     valuesProp.DeleteArrayElementAtIndex(i);
                     i--;
                 }
+
                 EditorGUILayout.EndHorizontal();
             }
         }
 
         private void ShowDropdown(SerializedProperty valuesProp)
         {
-            if (_allValueTypes == null) UpdateValueTypes();
-            
+            if (_allValueTypes == null)
+                _allValueTypes = UpdateValueTypes(_cachedBaseType);
+
             var existing = new HashSet<Type>();
             for (int i = 0; i < valuesProp.arraySize; i++)
             {
                 var value = valuesProp.GetArrayElementAtIndex(i).managedReferenceValue;
-                if (value != null) existing.Add(value.GetType());
+                if (value != null)
+                    existing.Add(value.GetType());
             }
 
             var possible = _allValueTypes.Where(t => !existing.Contains(t)).ToList();
+
             GenericMenu menu = new GenericMenu();
 
             if (possible.Count == 0)
@@ -106,9 +112,12 @@ namespace BagSerializer.Editor
                     menu.AddItem(new GUIContent(type.Name), false, () =>
                     {
                         valuesProp.serializedObject.Update();
+
                         valuesProp.arraySize++;
                         var newElement = valuesProp.GetArrayElementAtIndex(valuesProp.arraySize - 1);
+
                         newElement.managedReferenceValue = Activator.CreateInstance(type);
+
                         valuesProp.serializedObject.ApplyModifiedProperties();
                     });
                 }
@@ -117,17 +126,47 @@ namespace BagSerializer.Editor
             menu.ShowAsContext();
         }
 
-        private static void UpdateValueTypes()
+        private static List<Type> UpdateValueTypes(Type baseType)
         {
-            _allValueTypes = AppDomain.CurrentDomain.GetAssemblies()
+            return AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(a =>
                 {
                     try { return a.GetTypes(); }
-                    catch (ReflectionTypeLoadException e) { return e.Types.Where(tt => tt != null); }
+                    catch (ReflectionTypeLoadException e)
+                    {
+                        return e.Types.Where(tt => tt != null);
+                    }
                 })
-                .Where(t => typeof(Stat).IsAssignableFrom(t) && !t.IsAbstract)
+                .Where(t => baseType.IsAssignableFrom(t) && !t.IsAbstract)
                 .ToList();
+        }
+
+        private static Type GetGenericArgumentType(SerializedProperty property)
+        {
+            var targetType = property.serializedObject.targetObject.GetType();
+
+            var fields = targetType.GetFields(
+                BindingFlags.Instance |
+                BindingFlags.NonPublic |
+                BindingFlags.Public
+            );
+
+            foreach (var field in fields)
+            {
+                if (!property.propertyPath.Contains(field.Name))
+                    continue;
+
+                var fieldType = field.FieldType;
+
+                while (fieldType != null && !fieldType.IsGenericType)
+                {
+                    fieldType = fieldType.BaseType;
+                }
+
+                return fieldType?.GetGenericArguments().FirstOrDefault() ?? typeof(object);
+            }
+
+            return typeof(object);
         }
     }
 }
-#endif

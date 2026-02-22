@@ -1,0 +1,10 @@
+{
+  "name": "BDictionary-Editor",
+  "references": [
+    "BDictionary"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}
